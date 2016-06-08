@@ -6,5 +6,6 @@ if process.env['DEV'] is 'true'
   Config.watcher_key = './keys/watcher.pgp'
   Config.client_key = './keys/client.pgp'
   Config.policies_dir = './policies'
+  Config.local_storage = '.localstorage'
 
 module.exports = Config
