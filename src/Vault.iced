@@ -3,7 +3,7 @@ Horizon = require '@horizon/client/dist/horizon'
 localStorage = new (require 'node-localstorage').LocalStorage(Config.local_storage)
 
 class Vault
-  constructor : (host, sec, pub, cb) ->
+  constructor : (host, watcherFP, clientFP, cb) ->
     authType = @getToken()
     @hz = Horizon({host, authType})
 #    console.log "I am user", authType
@@ -17,7 +17,8 @@ class Vault
       localStorage.setItem 'horizon-jwt', token
       await @hz.currentUser().fetch().subscribe defer me
       unless me.data
-        me.data = {sec, pub}
+        me.data =
+          key: watcherFP
         @users.replace me
       console.log 'Me:', me
       cb and cb this
@@ -45,13 +46,13 @@ class Vault
     this[col]?.replace object
     cb and cb true
 
-  get : (col, cb) ->
-    this[col]?.fetch().subscribe (items) ->
+  get : (col, query, cb) ->
+    this[col]?.find(query).fetch().subscribe (items) ->
       cb and cb items
 
-  getOne : (col, query, cb) ->
-    this[col]?.find(query).fetch().subscribe (item) ->
-      cb and cb item
+  watch : (col, query, cb) ->
+    this[col]?.find(query).watch().subscribe (items) ->
+      cb and cb items
 
   remove : (col, ids, cb) ->
     console.log "Removing from #{col}"
