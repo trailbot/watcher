@@ -27,30 +27,40 @@ console.log 'Client fingerprint', clientFP
 await new Vault Config.vault, watcherFP, clientFP, defer vault
 console.log 'Connected to vault'
 
-watchers = {}
+watcher = null
 
 processSettings = (settings) ->
   console.log 'New settings:', settings
+
+  files = {}
   Object.keys(settings.files).map (key) ->
     p = path.normalize key
-    watchers[p] = extend settings.files[key], {}
-    watchers[p].differ = new Diff p
-    watchers[p].policies = watchers[p].policies.map (policy) ->
+    files[p] = extend settings.files[key], {}
+    files[p].differ = new Diff p
+    files[p].policies = files[p].policies.map (policy) ->
       policy.params.filename = p
       policy.sandbox = new Sandbox policy
       policy
 
-  watcher = chokidar.watch Object.keys watchers
+  if watcher
+    watcher.close()
+
+  watcher = chokidar.watch Object.keys files
   watcher
     .on 'ready', () =>
       console.log 'Ready for changes!'
     .on 'change', (path, stats) =>
-      file = watchers[path]
+      file = files[path]
       await file.differ.update defer changes
       console.log "Change detected in #{path}"
 
-      await cryptoBox.encrypt JSON.stringify(changes), defer err, encrypted
-      await vault.save 'diffs', {creator: watcherFP, reader: clientFP, content: encrypted}
+      await cryptoBox.encrypt JSON.stringify(changes), path, defer err, encrypted
+      await vault.save 'diffs',
+        creator: watcherFP
+        reader: clientFP
+        content: encrypted
+        datetime: new Date()
+        v: 1
 
       for policy in file.policies
         console.log "Must enforce policy #{policy.sandbox.name}"
