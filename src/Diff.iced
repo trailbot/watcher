@@ -7,12 +7,16 @@ class Diff
     @cur = ''
     @range = 5
     @filename = path.basename @filepath
-    await @update defer()
-    console.log "Monitoring #{@filepath}"
+    await @update defer(err, chunks)
+    if err
+      console.error "Error monitoring #{@filepath}: file does not exist"
+    else
+      console.log "Monitoring #{@filepath}"
 
   update : (cb) ->
     @prev = @cur
     await fs.readFile @filepath, {encoding: 'utf8'}, defer err, data
+    return cb err if cb and err
     @cur = data
     res = diff.diffLines @prev, @cur
     offset = 1
@@ -50,7 +54,7 @@ class Diff
             start: offset
             lines: cur.value.split('\n').slice(0, cur.count)
       offset += cur.count
-    cb and cb chunks
+    cb and cb null, chunks
 
   patch : (cb) ->
     return setTimeout @patch.bind(this, cb), 500 if not @cur

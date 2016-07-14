@@ -6,7 +6,6 @@ class Vault
   constructor : (host, watcherFP, clientFP, cb) ->
     authType = @getToken()
     @hz = Horizon({host, authType})
-#    console.log "I am user", authType
     @hz.connect()
     @users = @hz 'users'
     @settings = @hz 'settings'
@@ -23,11 +22,11 @@ class Vault
       console.log 'Me:', me
       cb and cb this
 
-#    @hz.onDisconnected (e) =>
-#      unless @retried
-#        @retried = true
-#        localStorage.removeItem 'horizon-jwt'
-#        @constructor host, sec, pub, cb
+    @hz.onDisconnected (e) =>
+      unless @retried
+        @retried = true
+        localStorage.removeItem 'horizon-jwt'
+        @constructor host, watcherFP, clientFP, cb
 
   getToken : () ->
     jwt = localStorage.getItem 'horizon-jwt'

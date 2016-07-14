@@ -39,6 +39,7 @@ processSettings = (settings) ->
     files[p].differ = new Diff p
     files[p].policies = files[p].policies.map (policy) ->
       policy.params.filename = p
+      console.log 'Creating Sandbox for', policy
       policy.sandbox = new Sandbox policy
       policy
 
@@ -51,7 +52,7 @@ processSettings = (settings) ->
       console.log 'Ready for changes!'
     .on 'change', (path, stats) =>
       file = files[path]
-      await file.differ.update defer changes
+      await file.differ.update defer err, changes
       console.log "Change detected in #{path}"
 
       await cryptoBox.encrypt JSON.stringify(changes), path, defer err, encrypted
@@ -65,7 +66,6 @@ processSettings = (settings) ->
       for policy in file.policies
         console.log "Must enforce policy #{policy.sandbox.name}"
         policy.sandbox.send changes
-
 
 vault.watch 'settings', {reader: watcherFP}, (settings) =>
   if settings
