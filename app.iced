@@ -29,10 +29,11 @@ app = class App
     await new Vault this, Config.vault, @watcherFP, @clientFP, defer @vault
     console.log 'Connected to vault'
 
-    @vault.watch 'settings', {reader: @watcherFP}, (settings) =>
+    @vault.watch 'settings', {reader: @watcherFP, creator: @clientFP}, (settings) =>
       if settings
-        console.log 'Decrypting...'
-        await @cryptoBox.decrypt settings, defer settings
+        console.log settings
+        if settings.content
+          await @cryptoBox.decrypt settings, defer settings
         @processSettings settings
 
   processSettings : (settings) =>
@@ -62,7 +63,7 @@ app = class App
         console.log "Change detected in #{path}"
 
         await @cryptoBox.encrypt JSON.stringify(changes), path, defer err, encrypted
-        await vault.save 'diffs',
+        await @vault.save 'diffs',
           creator: @watcherFP
           reader: @clientFP
           content: encrypted
