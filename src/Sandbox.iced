@@ -4,13 +4,11 @@ fs = require 'fs'
 mkdirp = require 'mkdirp'
 npm = require 'npm'
 vm = require 'vm'
-NodeVM = require('vm2').NodeVM
 Config = require './Config'
 
 class Sandbox
   constructor : (repo, cb) ->
     # Set policy uri, ref, name and path
-    console.log 'REPO', repo
     @uri = repo.uri
     @ref = repo.ref or 'master'
     @lang = repo.lang or 'javascript'
@@ -64,7 +62,6 @@ class Sandbox
       when 'icedcoffeescript'
         require('iced-coffee-script').compile code, {header: false, bare: true}
 
-
   install : (cb) =>
     console.log 'Installing dependencies...'
     await fs.readFile "#{@abs}/package.json", 'utf8', defer err, json
@@ -83,11 +80,13 @@ class Sandbox
           require "#{@abs}/node_modules/#{mod}"
       console: console
       module: {}
+      iced: require('iced-coffee-script').iced
     vm.runInContext code, @vm,
       displayErrors: true
     vm.runInContext "policy = new this.module.exports(#{JSON.stringify(params)})", @vm
 
   send : (o) =>
-    vm.runInContext "policy.receiver(#{JSON.stringify(o)})", @vm
+    if @vm?.module?.exports?
+      vm.runInContext "policy.receiver(#{JSON.stringify(o)})", @vm
 
 module.exports = Sandbox

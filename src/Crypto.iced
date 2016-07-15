@@ -2,22 +2,29 @@
 
 fs = require 'fs'
 kbpgp = require 'kbpgp'
+extend = require('util')._extend
 {Literal} = require '../node_modules/kbpgp/lib/openpgp/packet/literal'
 
 class Crypto
   constructor : (watcherKeyPath, clientKeyPath, cb) ->
-    esc = make_esc (err) -> console.log "[CRYPTO] Error: #{err}"
-    await fs.readFile watcherKeyPath, {encoding: 'utf8'}, esc defer watcherArmored
+    esc = make_esc (err) -> console.error "[CRYPTO] #{err}"
+
     await fs.readFile clientKeyPath, {encoding: 'utf8'}, esc defer clientArmored
-    wKey = {armored: watcherArmored}
+    await fs.readFile watcherKeyPath, {encoding: 'utf8'}, esc defer watcherArmored
     mKey = {armored: clientArmored}
+    wKey = {armored: watcherArmored}
+    await kbpgp.KeyManager.import_from_armored_pgp mKey, esc defer @clientKey
     await kbpgp.KeyManager.import_from_armored_pgp wKey, esc defer @watcherKey
     if @watcherKey.is_pgp_locked()
       await @watcherKey.unlock_pgp { passphrase: '' }, esc defer()
-    await kbpgp.KeyManager.import_from_armored_pgp mKey, esc defer @clientKey
+
+    @ring = new kbpgp.keyring.KeyRing
+    for km in [@clientKey, @watcherKey]
+      @ring.add_key_manager km
+
     cb this
 
-  encrypt : (data, filename, cb) ->
+  encrypt : (data, filename, cb) =>
     return setTimeout @encrypt.bind(this, data, cb), 500 if not @watcherKey
 
     params =
@@ -30,6 +37,16 @@ class Crypto
         data: new Buffer(data)
       ]
     kbpgp.box params, cb
+
+  decrypt : (data, cb) =>
+    esc = make_esc (err) -> console.error "[CRYPTO] #{err}"
+
+    params =
+      keyfetch: @ring
+      armored: data.content
+    await kbpgp.unbox params, esc defer literals
+    delete data.content
+    cb extend data, JSON.parse literals[0].toString()
 
 module.exports = Crypto
 

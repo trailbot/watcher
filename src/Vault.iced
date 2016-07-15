@@ -3,7 +3,8 @@ Horizon = require '@horizon/client/dist/horizon'
 localStorage = new (require 'node-localstorage').LocalStorage(Config.local_storage)
 
 class Vault
-  constructor : (host, watcherFP, clientFP, cb) ->
+  constructor : (app, host, watcherFP, clientFP, cb) ->
+    @app = app
     authType = @getToken()
     @hz = Horizon({host, authType})
     @hz.connect()
@@ -57,6 +58,5 @@ class Vault
     console.log "Removing from #{col}"
     res = this[col].removeAll(ids)
     cb and cb res
-
 
 module.exports = Vault
