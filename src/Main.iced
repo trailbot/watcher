@@ -5,11 +5,11 @@ path = require 'path'
 chokidar = require 'chokidar'
 extend = require('util')._extend
 
-Config = require './src/Config'
-Crypto = require './src/Crypto'
-Diff = require './src/Diff'
-Vault = require './src/Vault'
-Sandbox = require  './src/Sandbox'
+Config = require './Config'
+Crypto = require './Crypto'
+Diff = require './Diff'
+Vault = require './Vault'
+Sandbox = require  './Sandbox'
 
 process.on 'uncaughtException', (err) ->
   console.error err.stack
@@ -20,7 +20,7 @@ app = class App
   constructor : ->
     @watcher = null
 
-    await new Crypto Config.watcher_key, Config.client_key, defer @cryptoBox
+    await new Crypto Config.watcher_priv_key, Config.client_pub_key, defer @cryptoBox
     @watcherFP = @cryptoBox.watcherKey.get_pgp_fingerprint().toString('hex')
     @clientFP  = @cryptoBox.clientKey.get_pgp_fingerprint().toString('hex')
     console.log 'Watcher fingerprint:', @watcherFP

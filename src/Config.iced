@@ -1,11 +1,39 @@
+fs = require 'fs'
+{make_esc} = require 'iced-error'
+
 Config = {}
+
+Config.local_storage = '.localstorage'
+Config.vault = 'localhost:8181' # TODO use production server URL
+Config.policies_dir = './policies'
 
 if process.env['DEV'] is 'true'
   console.log 'DEV MODE'
   Config.vault = 'localhost:8181'
-  Config.watcher_key = './keys/watcher.pgp'
-  Config.client_key = '../client/SEMPER_client.pub'
-  Config.policies_dir = './policies'
-  Config.local_storage = '.localstorage'
+  Config.watcher_priv_key = fs.readFileSync './keys/watcher.pgp', {encoding: 'utf8'}
+  Config.watcher_pub_key = fs.readFileSync './keys/watcher.pgp', {encoding: 'utf8'}
+  Config.client_pub_key = fs.readFileSync '../client/SEMPER_client.pub', {encoding: 'utf8'}
+
+localStorage = new (require 'node-localstorage').LocalStorage(Config.local_storage)
+settings = localStorage.getItem 'settings'
+
+for key, val of settings
+  Config[key] = val
+
+if Config.vault? && Config.watcher_priv_key? && Config.client_pub_key?
+  Config.ready = true
+
+Config.header = """
+
+     .d8888b.  8888888888 888b     d888 8888888b.  8888888888 8888888b.
+    d88P  Y88b 888        8888b   d8888 888   Y88b 888        888   Y88b
+    Y88b.      888        88888b.d88888 888    888 888        888    888
+     "Y888b.   8888888    888Y88888P888 888   d88P 8888888    888   d88P
+        "Y88b. 888        888 Y888P 888 8888888P"  888        8888888P"
+          "888 888        888  Y8P  888 888        888        888 T88b
+    Y88b  d88P 888        888   "   888 888        888        888  T88b
+     "Y8888P"  8888888888 888       888 888        8888888888 888   T88b
+
+"""
 
 module.exports = Config

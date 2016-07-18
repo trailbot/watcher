@@ -6,11 +6,9 @@ extend = require('util')._extend
 {Literal} = require '../node_modules/kbpgp/lib/openpgp/packet/literal'
 
 class Crypto
-  constructor : (watcherKeyPath, clientKeyPath, cb) ->
+  constructor : (watcherArmored, clientArmored, cb) ->
     esc = make_esc (err) -> console.error "[CRYPTO] #{err}"
 
-    await fs.readFile clientKeyPath, {encoding: 'utf8'}, esc defer clientArmored
-    await fs.readFile watcherKeyPath, {encoding: 'utf8'}, esc defer watcherArmored
     mKey = {armored: clientArmored}
     wKey = {armored: watcherArmored}
     await kbpgp.KeyManager.import_from_armored_pgp mKey, esc defer @clientKey
