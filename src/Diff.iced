@@ -4,7 +4,6 @@ diff = require 'diff'
 
 class Diff
   constructor : (@filepath) ->
-    @cur = ''
     @range = 5
     @filename = path.basename @filepath
     await @update defer(err, chunks)
@@ -14,10 +13,14 @@ class Diff
       console.log "Monitoring #{@filepath}"
 
   update : (cb) ->
-    @prev = @cur
+    if @cur?
+      @prev = @cur
+    else
+      await fs.readFile @filepath, {encoding: 'utf8'}, defer err, data
+      @cur = !err? && data || ''
+      return
     await fs.readFile @filepath, {encoding: 'utf8'}, defer err, data
-    return cb err if cb and err
-    @cur = data
+    @cur = !err? && data || ''
     res = diff.diffLines @prev, @cur
     offset = 1
     chunks = []

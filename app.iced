@@ -57,21 +57,28 @@ app = class App
     @watcher
       .on 'ready', () =>
         console.log 'Ready for changes!'
-      .on 'change', (path, stats) =>
-        file = @files[path]
-        await file.differ.update defer err, changes
-        console.log "Change detected in #{path}"
+      .on 'change', @processChange
+      .on 'unlink', @processChange
+      .on 'add', @processChange
 
-        await @cryptoBox.encrypt JSON.stringify(changes), path, defer err, encrypted
-        await @vault.save 'diffs',
-          creator: @watcherFP
-          reader: @clientFP
-          content: encrypted
-          datetime: new Date()
-          v: 1
+  processChange : (path, stats) =>
+    file = @files[path]
+    if stats
+      console.log "Change detected in #{path}", stats
+    else
+      console.log "Somehow lost sight of #{path}"
 
-        for policy in file.policies
-          console.log "Must enforce policy #{policy.sandbox.name}"
-          policy.sandbox.send changes
+    await file.differ.update defer err, changes
+    await @cryptoBox.encrypt JSON.stringify(changes), path, defer err, encrypted
+    await @vault.save 'diffs',
+      creator: @watcherFP
+      reader: @clientFP
+      content: encrypted
+      datetime: new Date()
+      v: 1
+
+    for policy in file.policies
+      console.log "Must enforce policy #{policy.sandbox.name}"
+      policy.sandbox.send changes
 
 module.exports = new app()
