@@ -5,6 +5,8 @@ inquirer = require 'inquirer'
 colors = require 'colors'
 fs = require 'fs'
 os = require 'os'
+kbpgp = require 'kbpgp'
+progress = require 'progress'
 
 class Configure
 
@@ -13,23 +15,50 @@ class Configure
 
     inquirer.prompt [
       name: 'hostname'
-      message: 'Please choose a name for this watcher'
+      message: "Choose a name for this watcher"
       type: 'input'
       default: os.hostname()
     ,
       name: 'clientKey'
-      message: "Please type the route for the client's public key"
+      message: "Type the route for the client's public key"
+      type: 'input'
       default: './client_key.pub'
-      filter: (path) ->
+      validate: (path) ->
         new Promise (next) ->
           fs.readFile path, {encode: 'utf8'}, (err, content) ->
-            next content || err && false
-      validate: (content) ->
-        new Promise (next) ->
-          console.log content
+            next err or true
+    ,
+      name: 'vault'
+      message: "Type the FQDN of the vault server you want to use"
+      type: 'input'
+      default: 'vault.trailbot.io'
     ]
-    .then (answers) ->
-      console.log answers
+    .then (answers) =>
+      @alert "Ok, we are now generating a new PGP keypar for this watcher.", true
+      @alert "This may take up to a couple of minutes. Please wait while magic happens...\n "
+      @progress = new progress '  Generating... [:bar] :percent'.bold,
+        total: 330
+        complete: '='
+        incomplete: ' '
+        width: 60
+      await @keygen answers.hostname, defer priv, pub
+      @alert "Done! The watcher is now completely set up.", true
+
+  keygen : (identity, cb, pcb) =>
+    opts =
+      userid: "#{identity} <watcher@#{identity}>"
+      asp: new kbpgp.ASP
+        progress_hook: =>
+          @progress.tick() unless @progress.complete
+    await kbpgp.KeyManager.generate_rsa opts, defer err, key
+    await key.sign {}, defer err
+    await key.export_pgp_private {}, defer err, priv
+    await key.export_pgp_public {}, defer err, pub
+    cb priv, pub
+
+  alert : (text, breakBefore) ->
+    b = breakBefore and "\n" or ""
+    console.log "#{b}! ".green + text.bold
 
 
 new Configure()
