@@ -1,7 +1,6 @@
 {
-  "name": "semper-watcher",
-  "version": "0.0.1",
-  "private": true,
+  "name": "trailbot-watcher",
+  "version": "0.1.0",
   "dependencies": {
     "@horizon/client": "^1.1.1",
     "chokidar": "^1.5.1",

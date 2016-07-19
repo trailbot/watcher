@@ -1,5 +1,5 @@
 #!/usr/bin/env node
 'use strict'
 require('iced-coffee-script/register');
-const debug = require('debug')('semper-watcher'),
+const debug = require('debug')('trailbot-watcher'),
       app = require('../src/Main')
