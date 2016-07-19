@@ -12,7 +12,7 @@ TrailBot has three components:
 
 # Install
 
-With [npm](https://www.npmjs.com/) do:
+In your server, with [npm](https://www.npmjs.com/) do:
 ```
 npm install -g trailbot-watcher
 ```
