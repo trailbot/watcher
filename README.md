@@ -17,7 +17,7 @@ cd trailbot-watcher
 npm install
 npm run setup
 ```
-The last command guides you through the process of configuring the Watcher and importing your Trailbot Client's public key. Then you will have a completely functional watcher and you will be ready to start watching files and defining policies from the [__Client__](https://github.com/stampery/trailbot-vault).
+The last command guides you through the process of configuring the Watcher and importing your Trailbot Client's public key. Then you will have a completely functional watcher and you will be ready to start watching files and defining policies from the [__Client__](https://github.com/stampery/trailbot-client).
 
 # Encryption
 
