@@ -1,4 +1,4 @@
-# TrailBot Watcher
+# TrailBot Watcher <sup><sub><sup><sub>DEVELOPER PREVIEW</sub></sup></sub></sup>
 
 TrailBot tracks changes in your servers' files and logs and triggers smart policies.
 
@@ -9,12 +9,15 @@ TrailBot has three components:
 + [__Vault__](https://github.com/stampery/trailbot-vault): backend that works as a relay for the watcher's settings and the file changes.
 + [__Client__](https://github.com/stampery/trailbot-vault): desktop app for managing watchers, defining policies and reading file events.
 
-# Install
-
-In your server, with [npm](https://www.npmjs.com/) do:
+# Installing a watcher
+In your the server you want to monitor, simply do:
 ```
-npm install -g trailbot-watcher
+git clone https://github.com/stampery/trailbot-watcher
+cd trailbot-watcher
+npm install
+npm run setup
 ```
+The last command guides you through the process of configuring the Watcher and importing your Trailbot Client's public key. Then you will have a completely functional watcher and you will be ready to start watching files and defining policies from the [__Client__](https://github.com/stampery/trailbot-client).
 
 # Encryption
 
