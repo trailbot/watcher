@@ -7,6 +7,8 @@ fs = require 'fs'
 os = require 'os'
 kbpgp = require 'kbpgp'
 progress = require 'progress'
+localStorage = new require 'node-localstorage'
+  .LocalStorage(Config.local_storage)
 
 class Configure
 
@@ -31,7 +33,7 @@ class Configure
       name: 'vault'
       message: "Type the FQDN of the vault server you want to use"
       type: 'input'
-      default: 'vault.trailbot.io'
+      default: 'vault.trailbot.io:8443'
     ]
     .then (answers) =>
       @alert "Ok, we are now generating a new PGP keypar for this watcher.", true
@@ -41,7 +43,12 @@ class Configure
         complete: '='
         incomplete: ' '
         width: 60
-      await @keygen answers.hostname, defer priv, pub
+      await @keygen answers.hostname, defer watcher_priv_key, watcher_pub_key
+      await fs.readFile answers.clientKey, {encode: 'utf8'}, defer err, client_pub_key
+      localStorage.setItem 'watcher_priv_key', watcher_priv_key
+      localStorage.setItem 'watcher_pub_key', watcher_pub_key
+      localStorage.setItem 'client_pub_key', client_pub_key
+      localStorage.setItem 'vault', answers.vault
       @alert "Done! The watcher is now completely set up.", true
 
   keygen : (identity, cb, pcb) =>

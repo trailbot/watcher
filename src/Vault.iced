@@ -1,12 +1,15 @@
 Config = require './Config'
-Horizon = require '@horizon/client/dist/horizon'
+Horizon = require '@horizon/client/dist/horizon-dev'
 localStorage = new (require 'node-localstorage').LocalStorage(Config.local_storage)
 
 class Vault
   constructor : (app, host, watcherFP, clientFP, cb) ->
     @app = app
     authType = @getToken()
-    @hz = Horizon({host, authType})
+    secure = true
+    host = "vault.trailbot.io:8443"
+    @hz = Horizon({host, authType, secure})
+
     @hz.connect()
     @users = @hz 'users'
     @settings = @hz 'settings'
@@ -27,7 +30,7 @@ class Vault
       unless @retried
         @retried = true
         localStorage.removeItem 'horizon-jwt'
-        @constructor host, watcherFP, clientFP, cb
+        @constructor app, host, watcherFP, clientFP, cb
 
   getToken : () ->
     jwt = localStorage.getItem 'horizon-jwt'

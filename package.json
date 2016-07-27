@@ -38,6 +38,6 @@
   "scripts": {
     "start": "./scripts/start",
     "export": "./scripts/export",
-    "configure": "./scripts/configure"
+    "setup": "./scripts/setup"
   }
 }

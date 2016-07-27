@@ -2,4 +2,4 @@
 'use strict'
 require('iced-coffee-script/register');
 const debug = require('debug')('trailbot-watcher'),
-      app = require('../src/Configure')
+      app = require('../src/Setup')
