@@ -1,26 +1,29 @@
-# TrailBot Watcher <sup><sub><sup><sub>DEVELOPER PREVIEW</sub></sup></sub></sup>
+# [TrailBot Watcher](https://trailbot.io) <sup><sub><sup><sub>DEVELOPER PREVIEW</sub></sup></sub></sup>
 
 TrailBot tracks changes in your servers' files and logs and triggers smart policies.
 
-Smart policies are simple scripts that receive notifications every time a watched file changes. They trigger actions such as emailing someone, rolling files back or even shutting the system down.
+[Smart Policies](https://github.com/trailbot/client/wiki/Smart-Policies) are simple scripts that receive notifications every time a watched file changes. They trigger actions such as emailing someone, rolling files back or even shutting the system down.
 
 TrailBot has three components:
-+ [__Watcher__](https://github.com/stampery/trailbot-watcher): server demon that monitors your files and logs, registers file events and enforces the policies.
-+ [__Vault__](https://github.com/stampery/trailbot-vault): backend that works as a relay for the watcher's settings and the file changes.
-+ [__Client__](https://github.com/stampery/trailbot-vault): desktop app for managing watchers, defining policies and reading file events.
++ [__Watcher__](https://github.com/trailbot/watcher): (this repository) a server daemon that monitors your files and logs, registers file events and enforces [smart policies](https://github.com/trailbot/client/wiki/Smart-Policies).
++ [__Client__](https://github.com/trailbot/client): desktop app for managing watchers, defining policies and reading file events.
++ [__Vault__](https://github.com/trailbot/vault): a backend that works as a relay for the watcher's settings and the server events.
 
-# Installing a watcher
-In your the server you want to monitor, simply do:
-```
-git clone https://github.com/stampery/trailbot-watcher
-cd trailbot-watcher
-npm install
-npm run setup
-```
-The last command guides you through the process of configuring the Watcher and importing your Trailbot Client's public key. Then you will have a completely functional watcher and you will be ready to start watching files and defining policies from the [__Client__](https://github.com/stampery/trailbot-client).
+# Why Trailbot?
 
-# Encryption
 
-Trailbot uses end-to-end encryption for preserving your privacy and avoid any disclosure of sensitive information.
+# Installation
 
-Not even us can know anything about your files and logs nor read your file events and settings. Pretty cool, huh?
+Please refer to our [Getting Started guide](https://github.com/trailbot/client/blob/master/GETTING-STARTED.md) for detailed installation instructions.
+
+# Get Involved
+
+We'd love for you to help us build Trailbot. If you'd like to be a contributor, check out our [Contributing guide](https://github.com/trailbot/client/blob/master/CONTRIBUTING.md).
+
+# FAQ
+
+Check out our FAQ at the [GitHub wiki](https://github.com/trailbot/client/wiki/FAQ).
+
+## How will Trailbot be licensed?
+
+The Trailbot watcher, client and vault are eavailable under the [MIT License](https://github.com/trailbot/client/blob/master/LICENSE).
