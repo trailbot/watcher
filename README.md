@@ -1,4 +1,4 @@
-# [TrailBot Watcher](https://trailbot.io) <sup><sub><sup><sub>DEVELOPER PREVIEW</sub></sup></sub></sup>
+# [TrailBot](https://trailbot.io) Watcher<sup><sub><sup><sub>DEVELOPER PREVIEW</sub></sup></sub></sup>
 
 TrailBot tracks changes in your servers' files and logs and triggers smart policies.
 
