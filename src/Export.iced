@@ -47,7 +47,7 @@ class Exporter
           name: 'path'
           message: 'Path of the output file:'
           type: 'input'
-          default: './watcher_key.pub'
+          default: './trailbot_watcher.pub.asc'
           validate: (path) ->
             new Promise (next) ->
               console.log

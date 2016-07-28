@@ -24,14 +24,14 @@ class Configure
       name: 'clientKey'
       message: "Type the route for the client's public key"
       type: 'input'
-      default: './client_key.pub'
+      default: './trailbot_client.pub.asc'
       validate: (path) ->
         new Promise (next) ->
           fs.readFile path, {encode: 'utf8'}, (err, content) ->
             next err or true
     ,
       name: 'vault'
-      message: "Type the FQDN of the vault server you want to use"
+      message: "Type the FQDN and port of the vault server you want to use"
       type: 'input'
       default: 'vault.trailbot.io:8443'
     ]

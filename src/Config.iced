@@ -5,15 +5,14 @@ colors = require 'colors'
 Config = {}
 
 Config.local_storage = '.localstorage'
-Config.vault = 'vault.trailbot.io'
+Config.vault = 'vault.trailbot.io:8443'
 Config.policies_dir = './policies'
+Config.secure = true
 
 if process.env['DEV'] is 'true'
   console.log 'DEV MODE'
-  Config.vault = 'localhost:8181'
-  Config.watcher_priv_key = fs.readFileSync './trailbot_watcher.priv.asc', {encoding: 'utf8'}
-  Config.watcher_pub_key = fs.readFileSync './trailbot_watcher.pub.asc', {encoding: 'utf8'}
-  Config.client_pub_key = fs.readFileSync './trailbot_client.pub.asc', {encoding: 'utf8'}
+  Config.vault = 'localhost:8443'
+  Config.secure = false
 
 localStorage = new (require 'node-localstorage').LocalStorage(Config.local_storage)
 settings = localStorage._metaKeyMap

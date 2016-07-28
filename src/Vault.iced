@@ -1,13 +1,12 @@
 Config = require './Config'
-Horizon = require '@horizon/client/dist/horizon-dev'
+Horizon = require '@horizon/client/dist/horizon'
 localStorage = new (require 'node-localstorage').LocalStorage(Config.local_storage)
 
 class Vault
   constructor : (app, host, watcherFP, clientFP, cb) ->
     @app = app
     authType = @getToken()
-    secure = true
-    host = "vault.trailbot.io:8443"
+    secure = Config.secure
     @hz = Horizon({host, authType, secure})
 
     @hz.connect()
