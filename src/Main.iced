@@ -13,7 +13,7 @@ Sandbox = require  './Sandbox'
 
 process.on 'uncaughtException', (err) ->
   console.error err.stack
-  console.log 'Node NOT exiting...'
+  console.log '[WATCHER] Node NOT exiting...'
   return
 
 app = class App
@@ -23,11 +23,11 @@ app = class App
     await new Crypto Config.watcher_priv_key, Config.client_pub_key, defer @cryptoBox
     @watcherFP = @cryptoBox.watcherKey.get_pgp_fingerprint().toString('hex')
     @clientFP  = @cryptoBox.clientKey.get_pgp_fingerprint().toString('hex')
-    console.log 'Watcher fingerprint:', @watcherFP
-    console.log 'Client fingerprint', @clientFP
+    console.log '[WATCHER] Watcher fingerprint:', @watcherFP
+    console.log '[WATCHER] Client fingerprint', @clientFP
 
     await new Vault this, Config.vault, @watcherFP, @clientFP, defer @vault
-    console.log 'Connected to vault'
+    console.log '[WATCHER] Connected to vault'
 
     @vault.watch 'settings', {reader: @watcherFP, creator: @clientFP}, (settings) =>
       if settings
@@ -37,7 +37,7 @@ app = class App
         @processSettings settings
 
   processSettings : (settings) =>
-    console.log 'New settings:', settings
+    console.log '[WATCHER] New settings:', settings
 
     @files = {}
     Object.keys(settings.files).map (key) =>
@@ -46,7 +46,7 @@ app = class App
       @files[p].differ = new Diff p
       @files[p].policies = @files[p].policies.map (policy) ->
         policy.params.path = p
-        console.log 'Creating Sandbox for', policy
+        console.log '[WATCHER] Creating Sandbox for', policy
         policy.sandbox = new Sandbox policy
         policy
 
@@ -56,7 +56,7 @@ app = class App
     @watcher = chokidar.watch Object.keys @files
     @watcher
       .on 'ready', () =>
-        console.log 'Ready for changes!'
+        console.log '[WATCHER] Ready for changes!'
       .on 'change', @processChange
       .on 'unlink', @processChange
       .on 'add', @processChange
@@ -64,9 +64,9 @@ app = class App
   processChange : (path, stats) =>
     file = @files[path]
     if stats
-      console.log "Change detected in #{path}", stats
+      console.log "[WATCHER] Change detected in #{path}", stats
     else
-      console.log "Somehow lost sight of #{path}"
+      console.log "[WATCHER] Somehow lost sight of #{path}"
 
     await file.differ.update defer err, changes
     await @cryptoBox.encrypt JSON.stringify(changes), path, defer err, encrypted
@@ -78,7 +78,7 @@ app = class App
       v: 1
 
     for policy in file.policies
-      console.log "Must enforce policy #{policy.sandbox.name}"
+      console.log "[WATCHER] Enforcing policy #{policy.sandbox.name}"
       policy.sandbox.send changes
 
 module.exports = new app()

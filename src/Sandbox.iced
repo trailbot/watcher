@@ -17,13 +17,15 @@ class Sandbox
       'coffeescript': 'coffee'
       'icedcoffeescript': 'iced'
     }[@lang]
+    @queue = []
+    @ready = false
 
     @name = url.parse(@uri).pathname.slice(1).replace(/\.git/g, '')
     if @ref isnt 'master'
       @name += "/#{ref}"
     @path = path.normalize "#{Config.policies_dir}/#{@name}"
     @abs = path.resolve @path
-    console.log @path, @abs
+    #console.log @path, @abs
 
     # Make sure that path exists
     await mkdirp @path, defer err
@@ -31,9 +33,8 @@ class Sandbox
     await @pull defer()
     # Install dependencies
     await @install defer npmData
-    console.log npmData
     # Retrieve code and compile to JS
-    console.log "#{@path}/main.#{@ext}"
+    #console.log "#{@path}/main.#{@ext}"
     await fs.readFile "#{@path}/main.#{@ext}", 'utf8', defer err, code
     code = @toJS code
     # Start virtualization
@@ -42,7 +43,7 @@ class Sandbox
     cb and cb this
 
   pull : (cb) ->
-    console.log 'Pulling repository contents...'
+    console.log "[SANDBOX] Pulling repository contents from #{@uri}"
     @git = require('simple-git')(@path).init()
     await @git.getRemotes 'origin', defer err, remotes
     for remote in remotes
@@ -63,7 +64,7 @@ class Sandbox
         require('iced-coffee-script').compile code, {header: false, bare: true}
 
   install : (cb) =>
-    console.log 'Installing dependencies...'
+    console.log '[SANDBOX] Installing dependencies...'
     await fs.readFile "#{@abs}/package.json", 'utf8', defer err, json
     deps = Object.keys JSON.parse(json).dependencies
     await npm.load {prefix: @abs}, defer err
@@ -71,7 +72,7 @@ class Sandbox
     cb data
 
   virtualize : (code, params) =>
-    console.log 'Virtualizing...'
+    console.log '[SANDBOX] Virtualizing...'
     @vm = vm.createContext
       require: (mod) =>
         try
@@ -85,8 +86,17 @@ class Sandbox
       displayErrors: true
     vm.runInContext "policy = new this.module.exports(#{JSON.stringify(params)})", @vm
 
+    @ready = true
+    for o in @queue
+      @send o
+    @queue = []
+
   send : (o) =>
-    if @vm?.module?.exports?
-      vm.runInContext "policy.receiver(#{JSON.stringify(o)})", @vm
+    if @ready
+      if @vm?.module?.exports?
+        vm.runInContext "policy.receiver(#{JSON.stringify(o)})", @vm
+    else
+      console.log "[SANDBOX] #{@name or @uri} is not ready yet, queuing event (#{@queue.length + 1})"
+      @queue.push o
 
 module.exports = Sandbox
