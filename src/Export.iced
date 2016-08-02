@@ -8,8 +8,6 @@ fs = require 'fs'
 class Exporter
 
   constructor : ->
-    console.log Config.header.bold
-
     unless Config.watcher_pub_key
       console.error 'This watcher is not yet configured. Please run this command first:'.red
       console.error 'npm run-script configure'.cyan.bold

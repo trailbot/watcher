@@ -38,6 +38,10 @@
   "scripts": {
     "start": "./scripts/start",
     "export": "./scripts/export",
-    "setup": "./scripts/setup"
+    "service": "./scripts/service",
+    "setup": "./scripts/setup && ./scripts/export && ./scripts/service"
+  },
+  "bin": {
+    "trailbot-watcher": "./scripts/start"
   }
 }

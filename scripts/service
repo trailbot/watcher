@@ -1,0 +1,49 @@
+#!/bin/bash
+echo "Installing service...";
+touch /var/log/trailbot-watcher.log > /dev/null 2>&1 &&
+(
+if [ `which systemd` ]
+then
+
+cat > /etc/systemd/system/trailbot-watcher.service <<- EOM
+[Unit]
+Description=Trailbot Watcher
+Wants=network-online.target
+After=network.target network-online.target
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c "$(pwd)/scripts/start >> /var/log/trailbot-watcher.log 2>>\&1"
+Restart=always
+User=root
+Group=root
+WorkingDirectory=$(pwd)
+
+[Install]
+WantedBy=multi.user.target
+EOM
+systemctl enable trailbot-watcher
+
+else
+
+cat > /etc/init/trailbot-watcher.conf <<- EOM
+#!upstart
+description "Trailbot Watcher"
+
+respawn
+
+start on (local-filesystems and net-device-up IFACE!=lo)
+stop on shutdown
+
+script
+  chdir $(pwd)
+  exec /bin/sh -c "$(pwd)/scripts/start >> /var/log/trailbot-watcher.log 2>>\&1"
+end script
+EOM
+chmod +x /etc/init/trailbot-watcher.conf
+
+fi
+) && (
+service trailbot-watcher restart &&
+echo "Trailbot Watcher is now up and running!"
+) || echo -e "\e[01;31mERROR: Could not install service.\e[0m"
