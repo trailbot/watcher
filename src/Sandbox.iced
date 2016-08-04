@@ -33,12 +33,12 @@ class Sandbox
     await @pull defer()
     # Install dependencies
     await @install defer npmData
+    console.log "[NPM] Installed #{npmData.length} packages"
     # Retrieve code and compile to JS
-    #console.log "#{@path}/main.#{@ext}"
     await fs.readFile "#{@path}/main.#{@ext}", 'utf8', defer err, code
     code = @toJS code
     # Start virtualization
-    @virtualize(code, repo.params)
+    @virtualize code, repo.params
 
     cb and cb this
 
@@ -79,7 +79,9 @@ class Sandbox
           require mod
         catch e
           require "#{@abs}/node_modules/#{mod}"
-      console: console
+      console:
+        log: (first, others...) =>
+          console.log "[POLICY][#{@name}]:\n> #{first}", others...
       module: {}
       iced: require('iced-coffee-script').iced
     vm.runInContext code, @vm,
@@ -87,16 +89,16 @@ class Sandbox
     vm.runInContext "policy = new this.module.exports(#{JSON.stringify(params)})", @vm
 
     @ready = true
-    for o in @queue
-      @send o
+    for {o, p} in @queue
+      @send o, p
     @queue = []
 
-  send : (o) =>
+  send : (o, p) =>
     if @ready
       if @vm?.module?.exports?
-        vm.runInContext "policy.receiver(#{JSON.stringify(o)})", @vm
+        vm.runInContext "policy.receiver(#{JSON.stringify(o)}, #{JSON.stringify(p)})", @vm
     else
       console.log "[SANDBOX] #{@name or @uri} is not ready yet, queuing event (#{@queue.length + 1})"
-      @queue.push o
+      @queue.push {o, p}
 
 module.exports = Sandbox

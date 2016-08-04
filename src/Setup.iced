@@ -49,7 +49,6 @@ class Configure
       localStorage.setItem 'watcher_pub_key', watcher_pub_key
       localStorage.setItem 'client_pub_key', client_pub_key
       localStorage.setItem 'vault', answers.vault
-      @alert "Done! The watcher is now completely set up.", true
 
   keygen : (identity, cb, pcb) =>
     opts =

@@ -27,7 +27,7 @@ class Exporter
       message: "What method do you want to use for exporting your watcher's public key?"
       type: 'list'
       choices: [
-        name: 'Print to standard output'
+        name: 'Print to screen'
         value: 'stdio'
       ,
         name: 'Write to filesystem'

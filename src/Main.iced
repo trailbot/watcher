@@ -64,7 +64,7 @@ app = class App
   processChange : (path, stats) =>
     file = @files[path]
     if stats
-      console.log "[WATCHER] Change detected in #{path}", stats
+      console.log "[WATCHER] Change detected in #{path}"
     else
       console.log "[WATCHER] Somehow lost sight of #{path}"
 
@@ -76,9 +76,10 @@ app = class App
       content: encrypted
       datetime: new Date()
       v: 1
+    {prev, cur} = file.differ
 
     for policy in file.policies
       console.log "[WATCHER] Enforcing policy #{policy.sandbox.name}"
-      policy.sandbox.send changes
+      policy.sandbox.send changes, {prev, cur}
 
 module.exports = new app()
