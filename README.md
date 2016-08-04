@@ -1,3 +1,5 @@
+[<img style="width:100%;" src="https://raw.githubusercontent.com/trailbot/vault/master/dist/img/banner.png">](https://trailbot.io)
+
 # [Trailbot](https://trailbot.io) Watcher <sup><sub><sup><sub>DEVELOPER PREVIEW</sub></sup></sub></sup>
 
 Trailbot tracks your servers' files and logs and triggers Smart Policies upon unwanted modification.
