@@ -1,6 +1,6 @@
-# [TrailBot](https://trailbot.io) Watcher <sup><sub><sup><sub>DEVELOPER PREVIEW</sub></sup></sub></sup>
+# [Trailbot](https://trailbot.io) Watcher <sup><sub><sup><sub>DEVELOPER PREVIEW</sub></sup></sub></sup>
 
-TrailBot tracks changes in your servers' files and logs and triggers smart policies.
+Trailbot tracks your servers' files and logs and triggers Smart Policies upon unwanted modification.
 
 [Smart Policies](https://github.com/trailbot/client/wiki/Smart-Policies) are simple scripts that receive notifications every time a watched file changes. They trigger actions such as emailing someone, rolling files back or even shutting the system down.
 
@@ -22,8 +22,7 @@ We'd love for you to help us build Trailbot. If you'd like to be a contributor, 
 
 # FAQ
 
-Check out our FAQ at the [GitHub wiki](https://github.com/trailbot/client/wiki/FAQ).
+Check out our [FAQ at the wiki](https://github.com/trailbot/client/wiki/FAQ).
 
-### How will Trailbot be licensed?
+[<img style="width:100%;" src="https://raw.githubusercontent.com/trailbot/vault/master/dist/img/footer.png">](https://stampery.com)
 
-The Trailbot watcher, client and vault are eavailable under the [MIT License](https://github.com/trailbot/client/blob/master/LICENSE).
