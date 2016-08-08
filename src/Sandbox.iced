@@ -56,9 +56,10 @@ class Sandbox
     for remote in remotes
       @git.removeRemote(remote.name) if remote.name.length > 0
     @git
-      .addRemote('origin', @uri)
-      .pull('origin', @ref)
-      .checkout(@ref)
+      .addRemote 'origin', @uri
+      .fetch 'origin'
+      .reset 'hard'
+      .checkout @ref
       .then cb
 
   toJS : (code) ->
@@ -73,8 +74,7 @@ class Sandbox
   install : (cb) =>
     console.log "[SANDBOX](#{@id}) Installing dependencies..."
     await fs.readFile "#{@abs}/package.json", 'utf8', defer err, json
-    manifest = Object.keys JSON.parse(json)
-    deps = manifest.dependencies
+    deps = Object.keys JSON.parse(json).dependencies
     await npm.load {prefix: @abs}, defer err
     await npm.commands.install deps, defer err, data
     cb data
