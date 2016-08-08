@@ -4,6 +4,7 @@ fs = require 'fs'
 mkdirp = require 'mkdirp'
 npm = require 'npm'
 vm = require 'vm'
+crypto = require 'crypto'
 extend = require('util')._extend
 Config = require './Config'
 
@@ -21,12 +22,17 @@ class Sandbox
     @queue = []
     @ready = false
 
+    @id = crypto
+      .createHash 'md5'
+      .update "#{@file}:#{@uri}:#{JSON.stringify repo.params}"
+      .digest 'hex'
+      .slice 0, 7
+
     @name = url.parse(@uri).pathname.slice(1).replace(/\.git/g, '')
     if @ref isnt 'master'
       @name += "/#{ref}"
-    @path = path.normalize "#{Config.policies_dir}/#{@name}"
+    @path = path.normalize "#{Config.policies_dir}/#{@name}-#{@id}"
     @abs = path.resolve @path
-    #console.log @path, @abs
 
     # Make sure that path exists
     await mkdirp @path, defer err
@@ -44,7 +50,7 @@ class Sandbox
     cb and cb this
 
   pull : (cb) ->
-    console.log "[SANDBOX] Pulling repository contents from #{@uri}"
+    console.log "[SANDBOX](#{@id}) Pulling repository contents from #{@uri}"
     @git = require('simple-git')(@path).init()
     await @git.getRemotes 'origin', defer err, remotes
     for remote in remotes
@@ -65,9 +71,10 @@ class Sandbox
         require('iced-coffee-script').compile code, {header: false, bare: true}
 
   install : (cb) =>
-    console.log '[SANDBOX] Installing dependencies...'
+    console.log "[SANDBOX](#{@id}) Installing dependencies..."
     await fs.readFile "#{@abs}/package.json", 'utf8', defer err, json
-    deps = Object.keys JSON.parse(json).dependencies
+    manifest = Object.keys JSON.parse(json)
+    deps = manifest.dependencies
     await npm.load {prefix: @abs}, defer err
     await npm.commands.install deps, defer err, data
     cb data
@@ -81,13 +88,13 @@ class Sandbox
           require "#{@abs}/node_modules/#{mod}"
       console:
         log: (first, others...) =>
-          console.log "[POLICY][#{@name}]:\n> #{first}", others...
+          console.log "[POLICY][#{@name}][#{@file}](#{@id}):\n> #{first}", others...
       module: {}
       iced: require('iced-coffee-script').iced
     vm.runInContext code, @vm,
       displayErrors: true
     vm.runInContext "policy = new this.module.exports(#{JSON.stringify(params)})", @vm
-    console.log "[POLICY][#{@name}] Ready!"
+    vm.runInContext "console.log('Ready!');", @vm
 
     @ready = true
     for {diff, meta} in @queue
