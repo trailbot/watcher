@@ -10,6 +10,7 @@ Crypto = require './Crypto'
 Diff = require './Diff'
 Vault = require './Vault'
 Sandbox = require  './Sandbox'
+Event = require './Event'
 
 process.on 'uncaughtException', (err) ->
   console.error err.stack
@@ -46,8 +47,8 @@ app = class App
       @files[p].differ = new Diff p
       @files[p].policies = @files[p].policies.map (policy) ->
         policy.params.path = p
-        console.log '[WATCHER] Creating Sandbox for', policy
-        policy.sandbox = new Sandbox policy
+        console.log "[WATCHER] Creating Sandbox '#{policy.name}' (#{policy.uri}) for #{p}"
+        policy.sandbox = new Sandbox policy, p
         policy
 
     if @watcher
@@ -69,13 +70,14 @@ app = class App
       console.log "[WATCHER] Somehow lost sight of #{path}"
 
     await file.differ.update defer err, changes
-    await @cryptoBox.encrypt JSON.stringify(changes), path, defer err, encrypted
-    await @vault.save 'diffs',
+    event = new Event 'change',
+      path: path
       creator: @watcherFP
-      reader: @clientFP
-      content: encrypted
-      datetime: new Date()
-      v: 1
+      reader:  @clientFP
+      payload: changes
+    await event.encrypt @cryptoBox, defer()
+    event.save @vault
+
     {prev, cur} = file.differ
 
     for policy in file.policies

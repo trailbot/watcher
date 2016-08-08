@@ -4,10 +4,11 @@ fs = require 'fs'
 mkdirp = require 'mkdirp'
 npm = require 'npm'
 vm = require 'vm'
+extend = require('util')._extend
 Config = require './Config'
 
 class Sandbox
-  constructor : (repo, cb) ->
+  constructor : (repo, @file, cb) ->
     # Set policy uri, ref, name and path
     @uri = repo.uri
     @ref = repo.ref or 'master'
@@ -33,7 +34,7 @@ class Sandbox
     await @pull defer()
     # Install dependencies
     await @install defer npmData
-    console.log "[NPM] Installed #{npmData.length} packages"
+    console.log "[NPM] Installed #{npmData.length} new packages"
     # Retrieve code and compile to JS
     await fs.readFile "#{@path}/main.#{@ext}", 'utf8', defer err, code
     code = @toJS code
@@ -72,7 +73,6 @@ class Sandbox
     cb data
 
   virtualize : (code, params) =>
-    console.log '[SANDBOX] Virtualizing...'
     @vm = vm.createContext
       require: (mod) =>
         try
@@ -87,18 +87,23 @@ class Sandbox
     vm.runInContext code, @vm,
       displayErrors: true
     vm.runInContext "policy = new this.module.exports(#{JSON.stringify(params)})", @vm
+    console.log "[POLICY][#{@name}] Ready!"
 
     @ready = true
-    for {o, p} in @queue
-      @send o, p
+    for {diff, meta} in @queue
+      @send diff, meta
     @queue = []
 
-  send : (o, p) =>
+  send : (diff, meta) =>
     if @ready
       if @vm?.module?.exports?
-        vm.runInContext "policy.receiver(#{JSON.stringify(o)}, #{JSON.stringify(p)})", @vm
+        payload = extend meta,
+          diff: diff
+          path: @file
+          date: Date.now()
+        vm.runInContext "policy.receiver(#{JSON.stringify(payload)})", @vm
     else
       console.log "[SANDBOX] #{@name or @uri} is not ready yet, queuing event (#{@queue.length + 1})"
-      @queue.push {o, p}
+      @queue.push {diff, meta}
 
 module.exports = Sandbox

@@ -12,7 +12,7 @@ class Vault
     @hz.connect()
     @users = @hz 'users'
     @settings = @hz 'settings'
-    @diffs = @hz 'diffs'
+    @events = @hz 'events'
 
     @hz.onReady () =>
       token = JSON.parse(@hz.utensils.tokenStorage._storage._storage.get('horizon-jwt')).horizon
@@ -40,6 +40,7 @@ class Vault
 
   save : (col, object, cb) ->
     console.log "Saving into #{col}"
+    console.log 'SAVING', object
     this[col]?.store object
     cb and cb true
 

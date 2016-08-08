@@ -17,11 +17,15 @@ class Diff
       @prev = @cur
     else
       await fs.readFile @filepath, {encoding: 'utf8'}, defer err, data
-      @cur = !err? && data || ''
+      @cur =
+        content: !err? && data || ''
+        time: Date.now()
       return
     await fs.readFile @filepath, {encoding: 'utf8'}, defer err, data
-    @cur = !err? && data || ''
-    res = diff.diffLines @prev, @cur
+    @cur =
+      content: !err? && data || ''
+      time: Date.now()
+    res = diff.diffLines @prev.content, @cur.content
     offset = 1
     chunks = []
     res.forEach (cur, i, a) =>
@@ -58,11 +62,5 @@ class Diff
             lines: cur.value.split('\n').slice(0, cur.count)
       offset += cur.count
     cb and cb null, chunks
-
-  patch : (cb) ->
-    return setTimeout @patch.bind(this, cb), 500 if not @cur
-
-    await fs.readFile @filepath, {encoding: 'utf8'}, defer err, data
-    cb diff.createPatch @filename, @cur, data
 
 module.exports = Diff
