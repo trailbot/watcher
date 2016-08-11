@@ -1,6 +1,5 @@
 Config = require './Config'
 Horizon = require '@horizon/client/dist/horizon'
-localStorage = new (require 'node-localstorage').LocalStorage(Config.local_storage)
 
 class Vault
   constructor : (app, host, watcherFP, clientFP, cb) ->
@@ -16,23 +15,24 @@ class Vault
 
     @hz.onReady () =>
       token = JSON.parse(@hz.utensils.tokenStorage._storage._storage.get('horizon-jwt')).horizon
-      localStorage.setItem 'horizon-jwt', token
-      await @hz.currentUser().fetch().subscribe defer me
-      unless me.data
-        me.data =
-          key: watcherFP
-        @users.replace me
-      console.log 'Me:', me
-      cb and cb this
+      @app.localStorage.setItem 'horizon_jwt', token
+      @hz.currentUser().fetch().subscribe (me) =>
+        unless me.data
+          me.data =
+            key: watcherFP
+          @users.replace me
+        console.log 'Me:', me
+        @app.emit 'vaultLoggedIn', me
+        cb and cb this
 
     @hz.onDisconnected (e) =>
       unless @retried
         @retried = true
-        localStorage.removeItem 'horizon-jwt'
+        @app.localStorage.removeItem 'horizon_jwt'
         @constructor app, host, watcherFP, clientFP, cb
 
   getToken : () ->
-    jwt = localStorage.getItem 'horizon-jwt'
+    jwt = @app.localStorage.getItem 'horizon_jwt'
     if jwt
       { token: jwt, storeLocally: false }
     else
