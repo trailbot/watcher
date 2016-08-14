@@ -97,20 +97,19 @@ class Sandbox
     vm.runInContext "console.log('Ready!');", @vm
 
     @ready = true
-    for {diff, meta} in @queue
-      @send diff, meta
+    for payload in @queue
+      @send payload
     @queue = []
 
-  send : (diff, meta) =>
+  send : (payload) =>
     if @ready
       if @vm?.module?.exports?
-        payload = extend meta,
-          diff: diff
+        payload = extend payload,
           path: @file
           date: Date.now()
         vm.runInContext "policy.receiver(#{JSON.stringify(payload)})", @vm
     else
       console.log "[SANDBOX] #{@name or @uri} is not ready yet, queuing event (#{@queue.length + 1})"
-      @queue.push {diff, meta}
+      @queue.push payload
 
 module.exports = Sandbox

@@ -75,30 +75,25 @@ app = class App extends EventEmitter
     @watcher
       .on 'ready', () =>
         console.log '[WATCHER] Ready for changes!'
-      .on 'change', @processChange
-      .on 'unlink', @processChange
-      .on 'add', @processChange
+      .on 'change', (path, stats) => @eventProcessor 'change', path, stats
+      .on 'unlink', (path, stats) => @eventProcessor 'unlink', path, stats
+      .on 'add',    (path, stats) => @eventProcessor 'add', path, stats
 
-  processChange : (path, stats) =>
+  eventProcessor : (type, path, stats) =>
     file = @files[path]
-    if stats
-      console.log "[WATCHER] Change detected in #{path}"
-    else
-      console.log "[WATCHER] Somehow lost sight of #{path}"
-
+    console.log "[WATCHER] #{type} detected in #{path}"
     await file.differ.update defer err, changes
-    event = new Event 'change',
+    event = new Event type,
       path: path
       creator: @watcherFP
       reader:  @clientFP
-      payload: changes
+      payload: type is 'change' and changes or undefined
     await event.encrypt @cryptoBox, defer()
     event.save @vault
-
     {prev, cur} = file.differ
-
     for policy in file.policies
       console.log "[WATCHER] Enforcing policy #{policy.sandbox.name}"
-      policy.sandbox.send changes, {prev, cur}
+      policy.sandbox.send {diff, prev, cur}
+
 
 module.exports = new app()
