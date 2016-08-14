@@ -13,7 +13,7 @@ After=network.target network-online.target
 
 [Service]
 Type=simple
-ExecStart=/bin/sh -c "$(pwd)/scripts/start >> /var/log/trailbot-watcher.log 2>>\&1"
+ExecStart=/bin/sh -c "$(pwd)/scripts/start >> /var/log/trailbot-watcher.log 2>&1"
 Restart=always
 User=root
 Group=root
@@ -37,7 +37,7 @@ stop on shutdown
 
 script
   chdir $(pwd)
-  exec /bin/sh -c "$(pwd)/scripts/start >> /var/log/trailbot-watcher.log 2>>\&1"
+  exec /bin/sh -c "$(pwd)/scripts/start >> /var/log/trailbot-watcher.log 2>&1"
 end script
 EOM
 chmod +x /etc/init/trailbot-watcher.conf
