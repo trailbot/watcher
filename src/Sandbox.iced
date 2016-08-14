@@ -2,7 +2,7 @@ url = require 'url'
 path = require 'path'
 fs = require 'fs'
 mkdirp = require 'mkdirp'
-npm = require 'npm'
+npmInstall = require 'spawn-npm-install'
 vm = require 'vm'
 crypto = require 'crypto'
 extend = require('util')._extend
@@ -40,7 +40,8 @@ class Sandbox
     await @pull defer()
     # Install dependencies
     await @install defer npmData
-    console.log "[NPM] Installed #{npmData.length} new packages"
+    console.log npmData
+    #console.log "[NPM] Installed #{npmData.length} new packages"
     # Retrieve code and compile to JS
     await fs.readFile "#{@path}/main.#{@ext}", 'utf8', defer err, code
     code = @toJS code
@@ -72,12 +73,11 @@ class Sandbox
         require('iced-coffee-script').compile code, {header: false, bare: true}
 
   install : (cb) =>
-    console.log "[SANDBOX](#{@id}) Installing dependencies..."
     await fs.readFile "#{@abs}/package.json", 'utf8', defer err, json
     deps = Object.keys JSON.parse(json).dependencies
-    await npm.load {prefix: @abs}, defer err
-    await npm.commands.install deps, defer err, data
-    cb data
+    console.log "[SANDBOX](#{@id}) Installing dependencies from #{@abs}/package.json", deps
+    await npmInstall deps, {cwd: @abs}, defer err
+    cb err or "[SANDBOX](#{@id}) Successfully installed #{deps}"
 
   virtualize : (code, params) =>
     @vm = vm.createContext

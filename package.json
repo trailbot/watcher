@@ -1,6 +1,6 @@
 {
   "name": "trailbot-watcher",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "dependencies": {
     "@horizon/client": "^1.1.1",
     "chokidar": "^1.5.1",
@@ -20,6 +20,7 @@
     "npm": "^3.9.5",
     "progress": "^1.1.8",
     "simple-git": "^1.37.0",
+    "spawn-npm-install": "^1.2.0",
     "vm2": "^2.0.2",
     "watch": "^0.18.0"
   },
