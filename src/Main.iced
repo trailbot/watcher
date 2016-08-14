@@ -85,7 +85,10 @@ app = class App extends EventEmitter
   eventProcessor : (type, path, stats) =>
     file = @files[path]
     console.log "[WATCHER] #{type} detected in #{path}"
-    await file.differ.update defer err, changes
+
+    force = type is 'change'
+    await file.differ.update force, defer err, changes
+
     event = new Event type,
       path: path
       creator: @watcherFP
@@ -93,6 +96,7 @@ app = class App extends EventEmitter
       payload: type is 'change' and changes or undefined
     await event.encrypt @cryptoBox, defer()
     event.save @vault
+
     {prev, cur} = file.differ
     for policy in file.policies
       console.log "[WATCHER] Enforcing policy #{policy.sandbox.name}"

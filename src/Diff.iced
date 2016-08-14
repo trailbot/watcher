@@ -1,6 +1,7 @@
 fs = require 'fs'
 path = require 'path'
 diff = require 'diff'
+sleep = require('sleep').sleep
 
 class Diff
   constructor : (@filepath) ->
@@ -12,7 +13,7 @@ class Diff
     else
       console.log "Monitoring #{@filepath}"
 
-  update : (cb) ->
+  update : (force = false, cb) ->
     if @cur?
       @prev = @cur
     else
@@ -22,10 +23,17 @@ class Diff
         time: Date.now()
       return
     await fs.readFile @filepath, {encoding: 'utf8'}, defer err, data
+    if force
+      while data is ''
+        console.log "[DIFF] Delayed read (NodeJS is so weird)"
+        data = fs.readFileSync @filepath, 'utf8'
+        sleep 1
     @cur =
       content: !err? && data || ''
       time: Date.now()
     res = diff.diffLines @prev.content, @cur.content
+    return unless res.length > 1 or (res[0].added? or res[0].removed?)
+
     offset = 1
     chunks = []
     res.forEach (cur, i, a) =>
