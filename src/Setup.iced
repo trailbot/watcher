@@ -13,6 +13,11 @@ localStorage = new require 'node-localstorage'
 class Configure
 
   constructor : ->
+    @done = false
+    process.on 'exit', =>
+      unless @done
+        process.exitCode = 1
+
     console.log Config.header.bold
 
     inquirer.prompt [
@@ -42,13 +47,14 @@ class Configure
         total: 330
         complete: '='
         incomplete: ' '
-        width: 60
+        width: 50
       await @keygen answers.hostname, defer watcher_priv_key, watcher_pub_key
       await fs.readFile answers.clientKey, {encode: 'utf8'}, defer err, client_pub_key
       localStorage.setItem 'watcher_priv_key', watcher_priv_key
       localStorage.setItem 'watcher_pub_key', watcher_pub_key
       localStorage.setItem 'client_pub_key', client_pub_key
       localStorage.setItem 'vault', answers.vault
+      @done = true
 
   keygen : (identity, cb, pcb) =>
     opts =

@@ -47,6 +47,7 @@ app = class App extends EventEmitter
     console.log '[WATCHER] Connected to vault'
 
     @vault.watch 'settings', {reader: @watcherFP, creator: @clientFP}, (settings) =>
+      console.log settings
       if settings
         @emit 'newSettings'
         if settings.content

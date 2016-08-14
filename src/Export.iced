@@ -10,7 +10,7 @@ class Exporter
   constructor : ->
     unless Config.watcher_pub_key
       console.error 'This watcher is not yet configured. Please run this command first:'.red
-      console.error 'npm run-script configure'.cyan.bold
+      console.error 'sudo npm run-script configure'.cyan.bold
       return
 
     if process.argv[2]
@@ -32,9 +32,6 @@ class Exporter
       ,
         name: 'Write to filesystem'
         value: 'filesystem'
-      ,
-        name: 'Copy to another system over scp'
-        value: 'scp'
       ]
     ]
     .then ({output}) ->
