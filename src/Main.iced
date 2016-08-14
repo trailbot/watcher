@@ -71,7 +71,10 @@ app = class App extends EventEmitter
     if @watcher
       @watcher.close()
 
-    @watcher = chokidar.watch Object.keys @files
+    @watcher = chokidar.watch Object.keys @files,
+      awaitWriteFinish: true,
+      atomic: true
+
     @watcher
       .on 'ready', () =>
         console.log '[WATCHER] Ready for changes!'
