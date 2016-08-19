@@ -16,7 +16,11 @@ Mods = require './Mods'
 
 process.on 'uncaughtException', (err) ->
   console.error err.stack
-  console.log '[WATCHER] Node NOT exiting...'
+  if err.message.indexOf 'transport close' > -1
+    console.log '[WATCHER] Node exiting. If process is supervised, it will be respawned shortly.'
+    process.exit 1
+  else
+    console.log '[WATCHER] Node NOT exiting...'
   return
 
 app = class App extends EventEmitter
