@@ -91,13 +91,13 @@ app = class App extends EventEmitter
     console.log "[WATCHER] #{type} detected in #{path}"
 
     force = type is 'change'
-    await file.differ.update force, defer err, changes
+    await file.differ.update force, defer err, diff
 
     event = new Event type,
       path: path
       creator: @watcherFP
       reader:  @clientFP
-      payload: type is 'change' and changes or undefined
+      payload: type is 'change' and diff or undefined
     await event.encrypt @cryptoBox, defer()
     event.save @vault
 
