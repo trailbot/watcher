@@ -1,12 +1,16 @@
 'use strict'
 
 Config = require './Config'
+Crypto = require './Crypto'
 inquirer = require 'inquirer'
 colors = require 'colors'
 fs = require 'fs'
 os = require 'os'
 kbpgp = require 'kbpgp'
 progress = require 'progress'
+pgpWordList = require 'pgp-word-list-converter'
+crypto = require 'crypto'
+Vault = require './Vault'
 localStorage = new require 'node-localstorage'
   .LocalStorage(Config.local_storage)
 
@@ -54,6 +58,28 @@ class Configure
       localStorage.setItem 'watcher_pub_key', watcher_pub_key
       localStorage.setItem 'client_pub_key', client_pub_key
       localStorage.setItem 'vault', answers.vault
+
+      # test
+
+      await new Crypto watcher_priv_key, client_pub_key, defer cryptoBox
+      watcherFP = cryptoBox.watcherKey.get_pgp_fingerprint().toString('hex')
+      clientFP  = cryptoBox.clientKey.get_pgp_fingerprint().toString('hex')
+
+      channel =
+        channel: @generateChannel()
+        creator: watcherFP
+        watcher: watcher_pub_key
+        expires: @getExpirationDate()
+
+      await new Vault this, Config.vault, watcherFP, clientFP, defer vault
+      console.log "about to save"
+      await vault.save 'channel', channel, defer saved
+      console.log saved
+
+      localStorage.setItem 'channel', JSON.stringify channel, null, 4
+      # end test
+
+
       @done = true
 
   keygen : (identity, cb, pcb) =>
@@ -71,6 +97,15 @@ class Configure
   alert : (text, breakBefore) ->
     b = breakBefore and "\n" or ""
     console.log "#{b}! ".green + text.bold
+
+  generateChannel : () =>
+    word = Math.random().toString(36).substring(2)
+    crypto.createHash('md5').update(word).digest("hex").substr(0, 8)
+
+  getExpirationDate : () =>
+    now = new Date()
+    now.setMinutes(now.getMinutes() + 5)
+    now.toString()
 
 
 new Configure()
