@@ -14,6 +14,7 @@ class Exporter
       return
 
     if process.argv[2]
+      console.log "indice argv ", process.argv[2]
       await fs.writeFile process.argv[2], Config.watcher_pub_key, {encoding: 'utf8'}, defer err, res
       if err
         console.error 'Invalid output path: directory does not exist or writing to it is not allowed.'.red
@@ -36,7 +37,9 @@ class Exporter
     ]
     .then ({output}) ->
       if output is 'stdio'
-        console.log Config.watcher_pub_key
+        # console.log Config.watcher_pub_key
+        console.log "\nSentence:"
+        console.log "#{Config.sentence}\n".cyan.bold
       else if output is 'filesystem'
         inquirer.prompt [
           name: 'path'
@@ -46,7 +49,8 @@ class Exporter
           validate: (path) ->
             new Promise (next) ->
               console.log
-              await fs.writeFile path, Config.watcher_pub_key, {encoding: 'utf8'}, defer err, res
+              await fs.writeFile path, Config.sentence, {encoding: 'utf8'}, defer err, res
+              # await fs.writeFile path, Config.watcher_pub_key, {encoding: 'utf8'}, defer err, res
               next err && 'Invalid output path: directory does not exist or writing permission is not granted.' || true
         ]
         .then ({path}) ->

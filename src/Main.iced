@@ -46,7 +46,7 @@ app = class App extends EventEmitter
     console.log '[WATCHER] Watcher fingerprint:', @watcherFP
     console.log '[WATCHER] Client fingerprint', @clientFP
 
-    await new Vault this, Config.vault, @watcherFP, @clientFP, defer @vault
+    await new Vault this, Config.vault, @watcherFP, defer @vault
     @emit 'vaultConnected'
     console.log '[WATCHER] Connected to vault'
 

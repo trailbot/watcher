@@ -41,7 +41,7 @@
     "start": "./scripts/start",
     "export": "./scripts/export",
     "service": "./scripts/service",
-    "setup": "./scripts/setup && ./scripts/export && ./scripts/service"
+    "setup": "./scripts/setup && ./scripts/service"
   },
   "bin": {
     "trailbot-watcher": "./scripts/start"

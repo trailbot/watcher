@@ -2,7 +2,7 @@ Config = require './Config'
 Horizon = require '@horizon/client/dist/horizon'
 
 class Vault
-  constructor : (app, host, watcherFP, clientFP, cb) ->
+  constructor : (app, host, watcherFP, cb) ->
     @app = app
     authType = @getToken()
     secure = Config.secure
@@ -12,6 +12,7 @@ class Vault
     @users = @hz 'users'
     @settings = @hz 'settings'
     @events = @hz 'events'
+    @exchange = @hz 'exchange'
 
     @hz.onReady () =>
       token = JSON.parse(@hz.utensils.tokenStorage._storage._storage.get('horizon-jwt')).horizon
@@ -21,15 +22,15 @@ class Vault
           me.data =
             key: watcherFP
           @users.replace me
-        console.log 'Me:', me
-        @app.emit 'vaultLoggedIn', me
+        console.log 'Me:', me if @app.emit
+        @app.emit 'vaultLoggedIn', me if @app.emit
         cb and cb this
 
     @hz.onDisconnected (e) =>
       unless @retried
         @retried = true
         @app.localStorage.removeItem 'horizon_jwt'
-        @constructor app, host, watcherFP, clientFP, cb
+        @constructor app, host, watcherFP, cb
 
   getToken : () ->
     jwt = @app.localStorage.getItem 'horizon_jwt'
@@ -39,8 +40,8 @@ class Vault
       'anonymous'
 
   save : (col, object, cb) ->
-    console.log "Saving into #{col}"
-    console.log 'SAVING', object
+    console.log "Saving into #{col}" if @app.emit
+    console.log 'SAVING', object if @app.emit
     this[col]?.store object
     cb and cb true
 
@@ -61,5 +62,7 @@ class Vault
     console.log "Removing from #{col}"
     res = this[col].removeAll(ids)
     cb and cb res
+
+
 
 module.exports = Vault
