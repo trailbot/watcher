@@ -77,15 +77,11 @@ class Configure
         if change.client
           console.log "change"
           @localStorage.setItem 'client_pub_key', change.client
-          return
-          
-      watch.unsubscribe()
-      console.log "remove id",change.id
-      vault.remove 'exchange', [change], (res) =>
-        console.log res
-
-
-      console.log "exit"
+          watch.unsubscribe()
+          console.log "remove id",change.id
+          vault.remove 'exchange', [change], (res) =>
+            console.log "file deleted"
+            process.exit 0
 
 
 
