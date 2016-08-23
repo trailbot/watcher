@@ -34,12 +34,11 @@ class Configure
       name: 'vault'
       message: "Type the domain and port of the vault server you want to use"
       type: 'input'
-      #TODO set i.t back to production 'vault.trailbot.io:8443'
-      default: 'localhost:8443'
+      default: 'vault.trailbot.io:8443'
     ]
     .then (answers) =>
       @alert "Ok, we are now generating a new PGP keypar for this watcher.", true
-      @alert "This may take up to a couple of minutes. Please wait while magic happens...\n "
+      @alert "This may take up to a couple of minutes. Please wait while the magic happens...\n "
       @progress = new progress '  Generating... [:bar] :percent'.bold,
         total: 330
         complete: '='
@@ -59,26 +58,35 @@ class Configure
         watcher: watcher_pub_key
         expires: @getExpirationDate()
 
-      sentence = pgpWordList.toWords(exchange.channel).toString().replace(/,/g,' ')
-
       @done = true
+
       @alert "Now install Trailbot Client in your computer and start the setup wizard." , true
       @alert "The following 8 words will be required by the Trailbot Client:"
-      @alert "#{sentence}".cyan.bold, true
+      @alert "#{@channelToWords(exchange.channel)}".cyan.bold, true
 
       await new Vault this, answers.vault, watcherFP, defer vault
-      vault.save 'exchange', exchange
+      await vault.save 'exchange', exchange, defer {id}
+      process.exit 1 unless id
+      exchange.id = id
+
       @alert "Waiting for confirmation from Trailbot Client..." , true
-      vault.watch 'exchange', exchange, (change) =>
+      vault.watch 'exchange', exchange.id, (change) =>
         # if change is null the document was deleted
         process.exit 0 unless change
-        if change && change.client
+        if change?.client
+          console.log "storage..."
           @localStorage.setItem 'client_pub_key', change.client
           vault.remove 'exchange', [change], (res) =>
             console.log "file deleted"
 
-
-
+      # every 5 minutes generate new words
+      setInterval  =>
+        exchange.channel = @generateChannel()
+        vault.replace 'exchange', exchange
+        @alert "Time to get confirmation from Trailbot Client expired", true
+        @alert "New words generated"
+        @alert "#{@channelToWords(exchange.channel)}".cyan.bold, true
+      , 350000
 
 
 
@@ -107,6 +115,9 @@ class Configure
     now = new Date()
     now.setMinutes(now.getMinutes() + 5)
     now.toString()
+
+  channelToWords : (channel) =>
+    pgpWordList.toWords(channel).toString().replace(/,/g,' ')
 
 
 

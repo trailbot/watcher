@@ -39,10 +39,10 @@ class Vault
     else
       'anonymous'
 
-  save : (col, object) ->
+  save : (col, object, cb) ->
     console.log "Saving into #{col}" if @app.emit
     console.log 'SAVING', object if @app.emit
-    this[col]?.store object
+    this[col]?.store(object).subscribe(cb)
 
   replace : (col, object) ->
     console.log "Replacing into #{col}" if @app.emit
@@ -58,7 +58,8 @@ class Vault
     console.log "Removing from #{col}" if @app.emit
     this[col].removeAll(ids)
 
-
+  getCollection : () ->
+    @exchange
 
 
 module.exports = Vault
