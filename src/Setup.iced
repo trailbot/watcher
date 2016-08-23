@@ -50,9 +50,6 @@ class Configure
       @localStorage.setItem 'watcher_pub_key', watcher_pub_key
       @localStorage.setItem 'vault', answers.vault
 
-
-
-      # test
       await new Crypto watcher_priv_key, null, defer cryptoBox
       watcherFP = cryptoBox.watcherKey.get_pgp_fingerprint().toString('hex')
 
@@ -66,7 +63,7 @@ class Configure
 
       @done = true
       @alert "Now install Trailbot Client in your computer and start the setup wizard." , true
-      @alert "Then you will be required to enter these 4 words:"
+      @alert "The following 8 words will be required by the Trailbot Client:"
       @alert "#{sentence}".cyan.bold, true
 
       await new Vault this, answers.vault, watcherFP, defer vault
@@ -77,7 +74,6 @@ class Configure
         process.exit 0 unless change
         if change && change.client
           @localStorage.setItem 'client_pub_key', change.client
-          console.log "remove id",change.id
           vault.remove 'exchange', [change], (res) =>
             console.log "file deleted"
 
@@ -105,7 +101,7 @@ class Configure
 
   generateChannel : () =>
     word = Math.random().toString(36).substring(2)
-    crypto.createHash('md5').update(word).digest("hex").substr(0, 8)
+    crypto.createHash('md5').update(word).digest("hex").substr(0, 16)
 
   getExpirationDate : () =>
     now = new Date()

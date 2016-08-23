@@ -39,14 +39,13 @@ class Vault
     else
       'anonymous'
 
-  save : (col, object, cb) ->
+  save : (col, object) ->
     console.log "Saving into #{col}" if @app.emit
     console.log 'SAVING', object if @app.emit
     this[col]?.store object
-    cb and cb true
 
   replace : (col, object) ->
-    console.log "Replacing into #{col}"
+    console.log "Replacing into #{col}" if @app.emit
     this[col]?.replace object
 
   get : (col, query, cb) ->
@@ -56,7 +55,7 @@ class Vault
     this[col]?.find(query).watch().subscribe(cb, err)
 
   remove : (col, ids) ->
-    console.log "Removing from #{col}"
+    console.log "Removing from #{col}" if @app.emit
     this[col].removeAll(ids)
 
 
