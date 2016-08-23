@@ -70,18 +70,18 @@ class Configure
       @alert "#{sentence}".cyan.bold, true
 
       await new Vault this, answers.vault, watcherFP, defer vault
-      await vault.save 'exchange', exchange, defer saved
-
+      vault.save 'exchange', exchange
       @alert "Waiting for confirmation from Trailbot Client..." , true
-      watch = vault.watch 'exchange', exchange, (change) =>
-        if change.client
-          console.log "change"
+      vault.watch 'exchange', exchange, (change) =>
+        # if change is null the document was deleted
+        process.exit 0 unless change
+        if change && change.client
           @localStorage.setItem 'client_pub_key', change.client
-          watch.unsubscribe()
           console.log "remove id",change.id
           vault.remove 'exchange', [change], (res) =>
             console.log "file deleted"
-            process.exit 0
+
+
 
 
 

@@ -45,23 +45,20 @@ class Vault
     this[col]?.store object
     cb and cb true
 
-  replace : (col, object, cb) ->
+  replace : (col, object) ->
     console.log "Replacing into #{col}"
     this[col]?.replace object
-    cb and cb true
 
   get : (col, query, cb) ->
-    this[col]?.find(query).fetch().subscribe (items) ->
-      cb and cb items
+    this[col]?.find(query).fetch().defaultIfEmpty().subscribe(cb)
 
-  watch : (col, query, cb) ->
-    this[col]?.find(query).watch().subscribe (items) ->
-      cb and cb items
+  watch : (col, query, cb, err) ->
+    this[col]?.find(query).watch().subscribe(cb, err)
 
-  remove : (col, ids, cb) ->
+  remove : (col, ids) ->
     console.log "Removing from #{col}"
-    res = this[col].removeAll(ids)
-    cb and cb res
+    this[col].removeAll(ids)
+
 
 
 
