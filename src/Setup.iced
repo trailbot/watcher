@@ -8,7 +8,7 @@ fs = require 'fs'
 os = require 'os'
 kbpgp = require 'kbpgp'
 progress = require 'progress'
-pgpWordList = require 'pgp-word-list-converter'
+pgpWordList = require('pgp-word-list-converter')()
 crypto = require 'crypto'
 Vault = require './Vault'
 
@@ -74,7 +74,6 @@ class Configure
         # if change is null the document was deleted
         process.exit 0 unless change
         if change?.client
-          console.log "storage..."
           @localStorage.setItem 'client_pub_key', change.client
           vault.remove 'exchange', [change], (res) =>
             console.log "file deleted"
@@ -86,7 +85,7 @@ class Configure
         @alert "Time to get confirmation from Trailbot Client expired", true
         @alert "New words generated"
         @alert "#{@channelToWords(exchange.channel)}".cyan.bold, true
-      , 350000
+      , 300000
 
 
 
