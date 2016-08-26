@@ -33,10 +33,8 @@
     "grunt-contrib-watch": "^1.0.0",
     "grunt-githooks": "^0.6.0",
     "grunt-nodemon": "^0.4.0",
-    "ngrok": "^2.1.7",
-    "pre-commit": "^1.0.1"
+    "ngrok": "^2.1.7"
   },
-  "pre-commit": [],
   "scripts": {
     "start": "./scripts/start",
     "export": "./scripts/export",
