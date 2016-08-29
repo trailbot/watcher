@@ -59,15 +59,16 @@ class Configure
         expires: @getExpirationDate()
 
       @done = true
-
-      @alert "Now install Trailbot Client in your computer and start the setup wizard." , true
-      @alert "The following 8 words will be required by the Trailbot Client:"
-      @alert "#{@channelToWords(exchange.channel)}".cyan.bold, true
+      console.log '\n'
 
       await new Vault this, answers.vault, watcherFP, defer vault
       await vault.save 'exchange', exchange, defer {id}
       process.exit 1 unless id
       exchange.id = id
+
+      @alert "Now install Trailbot Client in your computer and start the setup wizard." , true
+      @alert "The following 8 words will be required by Trailbot Client:"
+      @alert "#{@channelToWords(exchange.channel)}".cyan.bold, true
 
       @alert "Waiting for confirmation from Trailbot Client..." , true
       vault.watch 'exchange', exchange.id, (change) =>
