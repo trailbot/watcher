@@ -9,16 +9,20 @@ class Crypto
   constructor : (watcherArmored, clientArmored, cb) ->
     esc = make_esc (err) -> console.error "[CRYPTO] #{err}"
 
-    mKey = {armored: clientArmored}
+
     wKey = {armored: watcherArmored}
-    await kbpgp.KeyManager.import_from_armored_pgp mKey, esc defer @clientKey
+
     await kbpgp.KeyManager.import_from_armored_pgp wKey, esc defer @watcherKey
     if @watcherKey.is_pgp_locked()
       await @watcherKey.unlock_pgp { passphrase: '' }, esc defer()
 
     @ring = new kbpgp.keyring.KeyRing
-    for km in [@clientKey, @watcherKey]
-      @ring.add_key_manager km
+    @ring.add_key_manager @watcherKey
+
+    if clientArmored
+      mKey = {armored: clientArmored}
+      await kbpgp.KeyManager.import_from_armored_pgp mKey, esc defer @clientKey
+      @ring.add_key_manager @clientKey
 
     cb this
 
@@ -47,4 +51,3 @@ class Crypto
     cb extend data, JSON.parse literals[0].toString()
 
 module.exports = Crypto
-
