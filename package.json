@@ -1,6 +1,6 @@
 {
   "name": "trailbot-watcher",
-  "version": "0.1.6",
+  "version": "0.3.0",
   "dependencies": {
     "@horizon/client": "^1.1.3",
     "chokidar": "^1.5.1",
