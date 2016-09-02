@@ -82,6 +82,7 @@ class Configure
       # every 5 minutes generate new words
       setInterval  =>
         exchange.channel = @generateChannel()
+        exchange.expires = @getExpirationDate()
         vault.replace 'exchange', exchange
         @alert "Time to get confirmation from Trailbot Client expired", true
         @alert "New words generated"
