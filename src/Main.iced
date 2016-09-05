@@ -103,8 +103,9 @@ app = class App extends EventEmitter
 
     {prev, cur} = file.differ
     for policy in file.policies
-      console.log "[WATCHER] Enforcing policy #{policy.sandbox.name}"
-      policy.sandbox.send {diff, prev, cur}
+      unless policy.paused
+        console.log "[WATCHER] Enforcing policy #{policy.sandbox.name}"
+        policy.sandbox.send {diff, prev, cur}
 
 
 module.exports = new app()
