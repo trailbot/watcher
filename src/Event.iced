@@ -1,6 +1,7 @@
 class Event
 
   constructor : (@type, {@creator, @reader, @path, @payload}) ->
+    @ref = Date.now()
     this
 
   encrypt : (crypto, cb) =>
@@ -14,6 +15,7 @@ class Event
 
   save : (vault, cb) =>
     vault.save 'events',
+      ref:      @ref
       creator:  @creator
       reader:   @reader
       content:  @encrypted
