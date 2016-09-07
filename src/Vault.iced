@@ -18,10 +18,9 @@ class Vault
       token = JSON.parse(@hz.utensils.tokenStorage._storage._storage.get('horizon-jwt')).horizon
       @app.localStorage.setItem 'horizon_jwt', token
       @hz.currentUser().fetch().subscribe (me) =>
-        unless me.data
-          me.data =
-            key: watcherFP
-          @users.replace me
+        me.data =
+          key: watcherFP
+        @users.replace me
         console.log 'Me:', me if @app.emit
         @app.emit 'vaultLoggedIn', me if @app.emit
         cb and cb this

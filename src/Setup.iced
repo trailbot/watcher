@@ -76,7 +76,7 @@ class Configure
         process.exit 0 unless change
         if change?.client
           @localStorage.setItem 'client_pub_key', change.client
-          vault.remove 'exchange', [change], (res) =>
+          vault.remove 'exchange', [change.id], (res) =>
             console.log "file deleted"
 
       # every 5 minutes generate new words
