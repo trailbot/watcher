@@ -7,6 +7,7 @@ vm = require 'vm'
 crypto = require 'crypto'
 extend = require('util')._extend
 Config = require './Config'
+PolicyAPI = require './PolicyAPI'
 
 class Sandbox
   constructor : (repo, @file, cb) ->
@@ -59,7 +60,7 @@ class Sandbox
     @git
       .addRemote 'origin', @uri
       .fetch 'origin'
-      .reset 'hard'
+      .reset ["origin/#{@ref}",'--hard']
       .checkout @ref
       .then cb
 
@@ -91,6 +92,9 @@ class Sandbox
           console.log "[POLICY][#{@name}][#{@file}](#{@id}):\n> #{first}", others...
       module: {}
       iced: require('iced-coffee-script').iced
+      PolicyAPI: new PolicyAPI(@file)
+
+
     vm.runInContext code, @vm,
       displayErrors: true
     vm.runInContext "policy = new this.module.exports(#{JSON.stringify(params)})", @vm
