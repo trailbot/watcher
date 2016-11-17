@@ -2,7 +2,8 @@
 echo "Installing service...";
 touch /var/log/trailbot-watcher.log > /dev/null 2>&1 &&
 (
-if [ `which systemd` ]
+# Systemd
+if [ $(which systemd >/dev/null 2>&1) ]
 then
 
 cat > /etc/systemd/system/trailbot-watcher.service <<- EOM
@@ -26,6 +27,10 @@ systemctl enable trailbot-watcher
 
 else
 
+# Upstart
+if [ $(which upstart >/dev/null 2>&1) ]
+then
+
 cat > /etc/init/trailbot-watcher.conf <<- EOM
 #!upstart
 description "Trailbot Watcher"
@@ -42,6 +47,63 @@ end script
 EOM
 chmod +x /etc/init/trailbot-watcher.conf
 
+# System V
+else
+
+cat > /etc/init.d/trailbot-watcher <<- EOM
+#!/bin/bash
+#
+# trailbot-watcher        Start up Trailbot Watcher
+#
+# chkconfig: 2345 55 25
+# processname: trailbot-watcher
+# pidfile: /var/run/trailbot-watcher.pid
+
+### BEGIN INIT INFO
+# Provides: trailbot-watcher
+# Required-Start: \$local_fs \$network \$syslog
+# Required-Stop: \$local_fs \$syslog
+# Should-Start: \$syslog
+# Should-Stop: \$network \$syslog
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+### END INIT INFO
+
+# Source function library.
+. /etc/init.d/functions
+
+PIDFILE="/var/run/trailbot-watcher.pid"
+
+start() {
+  cd $(pwd)
+  /bin/sh -c $(pwd)/scripts/start >> /var/log/trailbot-watcher.log 2>&1 &
+  echo \$! > \$PIDFILE
+}
+
+stop() {
+  killproc -p \$PIDFILE >/dev/null 2>&1
+}
+
+case "\$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart|reload|force-reload)
+    stop
+    start
+    ;;
+  *)
+    echo \$"Usage: \$0 {start|stop|restart|reload|force-reload}"
+    exit 2
+esac
+
+EOM
+chmod +x /etc/init.d/trailbot-watcher
+
+fi
 fi
 ) && (
 service trailbot-watcher restart &&
